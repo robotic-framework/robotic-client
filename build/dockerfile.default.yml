@@ -1,0 +1,20 @@
+from: ${PROFZONE_DOCKER_REGISTRY}/profzone/golang-runtime:1.14
+image: ${PROFZONE_DOCKER_REGISTRY}/${PROJECT_GROUP}/${PROJECT_NAME}:${PROJECT_VERSION}
+workdir: /go/bin
+env:
+  GOENV: DEV
+  ROBOTIC_CLIENT_AGENT_HOST: localhost
+  ROBOTIC_CLIENT_AGENT_MODE: grpc
+  ROBOTIC_CLIENT_AGENT_PORT: "8910"
+  ROBOTIC_CLIENT_AGENT_PULLCONFIGINTERVAL: "10"
+  ROBOTIC_CLIENT_AGENT_STACKID: "1001"
+  ROBOTIC_CLIENT_AGENT_STORAGEPATH: ./build/configs/raw_config
+  ROBOTIC_CLIENT_AGENT_TIMEOUT: "5"
+  ROBOTIC_CLIENT_EVENT_DRIVER: BUILDIN
+add:
+  ./api/openapi.json: ./api/openapi.json
+  ./build/configs: ./configs
+  ./build/robotic-client: ./
+  ./project.yml: ./
+cmd:
+- ./robotic-client

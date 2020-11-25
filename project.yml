@@ -1,0 +1,13 @@
+name: robotic-client
+group: robotic-framework
+owner: robotic-framework
+version: 0.0.0
+description: 机器人客户端
+program_language: golang
+workflow:
+  extends: feature-pr-no-test
+scripts:
+  build:
+  - go build -v -o ./build/$PROJECT_NAME ./cmd
+  - eden generate openapi
+  test: go test ./cmd

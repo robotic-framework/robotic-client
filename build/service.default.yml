@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  name: ${PROJECT_NAME}
+  namespace: ${PROJECT_GROUP}
+  ownerReferences:
+  - apiVersion: apps/v1beta2
+    kind: Deployment
+    name: ${PROJECT_NAME}
+    uid: ${DEPLOYMENT_UID}
+spec:
+  selector:
+    workload.user.cattle.io/workloadselector: ${PROJECT_SELECTOR}
+status:
+  loadBalancer: {}
