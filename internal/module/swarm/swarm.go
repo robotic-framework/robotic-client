@@ -1,6 +1,7 @@
 package swarm
 
 import (
+	"github.com/eden-framework/context"
 	"github.com/robotic-framework/robotic-client/internal/constants/enums"
 	"github.com/robotic-framework/robotic-client/internal/global"
 	"github.com/robotic-framework/robotic-client/internal/module/controller_adaptor"
@@ -21,6 +22,8 @@ type Swarm struct {
 	// TODO 蜂群
 	wingmen []*Wingman
 	r       *gobot.Robot
+
+	ctx *context.WaitStopContext
 }
 
 func NewSwarm(name string, opts ...Option) *Swarm {
@@ -33,7 +36,7 @@ func NewSwarm(name string, opts ...Option) *Swarm {
 	return r
 }
 
-func NewSwarmFromConfig(config global.RobotConfiguration) *Swarm {
+func NewSwarmFromConfig(ctx *context.WaitStopContext, config global.RobotConfiguration) *Swarm {
 	r := &Swarm{
 		Name: config.Name,
 	}

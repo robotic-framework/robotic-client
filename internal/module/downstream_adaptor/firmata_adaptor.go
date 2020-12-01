@@ -18,6 +18,10 @@ func NewFirmataAdaptor(port string) *FirmataAdaptor {
 	return a
 }
 
+func (a *FirmataAdaptor) GetPID() (resp PIDConfig, err error) {
+	return
+}
+
 func (a *FirmataAdaptor) WriteString(str []byte) error {
 	buf := bytes.NewBuffer([]byte{})
 	buf.WriteByte(client.StringData)

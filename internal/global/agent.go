@@ -6,11 +6,11 @@ var AgentConfig = struct {
 	Agent *config_agent.Agent
 }{
 	Agent: &config_agent.Agent{
-		Host:               "localhost",
+		Host:               "127.0.0.1",
 		Mode:               "grpc",
-		Port:               8910,
+		Port:               8900,
 		Timeout:            5,
 		PullConfigInterval: 10,
-		StackID:            1001,
+		StackID:            0,
 	},
 }

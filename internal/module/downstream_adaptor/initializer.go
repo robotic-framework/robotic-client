@@ -12,9 +12,10 @@ var typeInitializer map[enums.DownstreamAdaptorType]initializer
 func init() {
 	typeInitializer = make(map[enums.DownstreamAdaptorType]initializer)
 	typeInitializer[enums.DOWNSTREAM_ADAPTOR_TYPE__FIRMATA] = firmataAdaptorInitializer
+	typeInitializer[enums.DOWNSTREAM_ADAPTOR_TYPE__MSP] = mspAdaptorInitializer
 }
 
-type initializer func(config global.RobotConfiguration) gobot.Adaptor
+type initializer func(config global.RobotConfiguration) DownstreamAdaptor
 
 func NewDownstreamAdaptor(typ enums.DownstreamAdaptorType, config global.RobotConfiguration) DownstreamAdaptor {
 	initFunc, ok := typeInitializer[typ]
@@ -26,9 +27,14 @@ func NewDownstreamAdaptor(typ enums.DownstreamAdaptorType, config global.RobotCo
 
 type DownstreamAdaptor interface {
 	gobot.Adaptor
+	GetPID() (PIDConfig, error)
 }
 
-func firmataAdaptorInitializer(config global.RobotConfiguration) gobot.Adaptor {
+func firmataAdaptorInitializer(config global.RobotConfiguration) DownstreamAdaptor {
 	firmataAdaptor := NewFirmataAdaptor(config.SelfDownstreamAdaptorFirmataName)
 	return firmataAdaptor
+}
+
+func mspAdaptorInitializer(config global.RobotConfiguration) DownstreamAdaptor {
+	return NewMSPAdaptor(config.SelfDownstreamAdaptorMSPName)
 }

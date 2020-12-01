@@ -22,21 +22,14 @@ func WithSelfDownstreamAdaptor(adaptor downstream_adaptor.DownstreamAdaptor) Opt
 	}
 }
 
-func WithManualMode(adaptor *controller_adaptor.ProxyAdaptor) Option {
+func WithMode(m enums.RobotMode) Option {
 	return func(r *Swarm) {
-		r.Mode = enums.ROBOT_MODE__MANUAL
-		r.controlAdaptor = adaptor
-		r.r.AddConnection(adaptor)
+		r.Mode = m
 	}
 }
 
-func WithSelfTestMode() Option {
+func WithWorkingFunc(factory func(r *Swarm) func()) Option {
 	return func(r *Swarm) {
-		r.Mode = enums.ROBOT_MODE__TEST
-		r.r.Work = SelfTestModeWork
+		r.r.Work = factory(r)
 	}
-}
-
-func SelfTestModeWork() {
-
 }

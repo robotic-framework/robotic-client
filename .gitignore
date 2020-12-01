@@ -1,3 +1,5 @@
 .idea
 go.sum
 build/configs/raw_config
+build/configs/local.yml
+build/project.yml

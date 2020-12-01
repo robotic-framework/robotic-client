@@ -36,7 +36,7 @@ func startTrigger(m event.Message) (event.Message, error) {
 	globalCtx.Add(1)
 	defer globalCtx.Finish()
 
-	r := swarm.NewSwarmFromConfig(global.RobotConfig.Swarm)
+	r := swarm.NewSwarmFromConfig(globalCtx, global.RobotConfig.Swarm)
 	go r.Start()
 
 	<-globalCtx.Done()
