@@ -18,8 +18,52 @@ func NewFirmataAdaptor(port string) *FirmataAdaptor {
 	return a
 }
 
-func (a *FirmataAdaptor) GetPID() (resp PIDConfig, err error) {
+func (a *FirmataAdaptor) GetIdentity() (resp IdentityResp, err error) {
 	return
+}
+
+func (a *FirmataAdaptor) GetStatus() (resp StatusResp, err error) {
+	return
+}
+
+func (a *FirmataAdaptor) GetPID() (resp PIDResp, err error) {
+	return
+}
+
+func (a *FirmataAdaptor) GetAttitude() (resp AttitudeResp, err error) {
+	return
+}
+
+func (a *FirmataAdaptor) GetAltitude() (resp AltitudeResp, err error) {
+	return
+}
+
+func (a *FirmataAdaptor) GetRawIMU() (resp RawIMUResp, err error) {
+	return
+}
+
+func (a *FirmataAdaptor) GetServo() (resp ServoResp, err error) {
+	return
+}
+
+func (a *FirmataAdaptor) GetServoConfig() (resp ServoConfigResp, err error) {
+	return
+}
+
+func (a *FirmataAdaptor) GetMotor() (resp MotorResp, err error) {
+	return
+}
+
+func (a *FirmataAdaptor) GetMotorPins() (resp MotorPinResp, err error) {
+	return
+}
+
+func (a *FirmataAdaptor) AccCalibration() error {
+	return nil
+}
+
+func (a *FirmataAdaptor) MagCalibration() error {
+	return nil
 }
 
 func (a *FirmataAdaptor) WriteString(str []byte) error {

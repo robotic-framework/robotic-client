@@ -3,9 +3,10 @@ package downstream_adaptor
 import (
 	"bytes"
 	"github.com/sirupsen/logrus"
-	"github.com/tarm/serial"
+	"go.bug.st/serial.v1"
 	"gobot.io/x/gobot"
 	"io"
+	"time"
 )
 
 var (
@@ -16,21 +17,23 @@ type MSPAdaptor struct {
 	name string
 	port string
 	conn io.ReadWriteCloser
-	Dial func(port string) (io.ReadWriteCloser, error)
+
+	BoardReadyDuration time.Duration
+	Dial               func(port string) (io.ReadWriteCloser, error)
 	gobot.Eventer
 }
 
-func NewMSPAdaptor(port string) *MSPAdaptor {
+func NewMSPAdaptor(port string, readyDuration time.Duration) *MSPAdaptor {
 	a := &MSPAdaptor{
-		name: "MSPAdaptor",
-		port: port,
+		name:               "MSPAdaptor",
+		port:               port,
+		BoardReadyDuration: readyDuration,
 		Dial: func(port string) (io.ReadWriteCloser, error) {
-			return serial.OpenPort(&serial.Config{
-				Name:     port,
-				Baud:     115200,
-				Size:     8,
-				Parity:   serial.ParityNone,
-				StopBits: serial.Stop1,
+			return serial.Open(port, &serial.Mode{
+				BaudRate: 115200,
+				DataBits: 8,
+				Parity:   serial.NoParity,
+				StopBits: serial.OneStopBit,
 			})
 		},
 		Eventer: gobot.NewEventer(),
@@ -54,6 +57,10 @@ func (a *MSPAdaptor) Connect() error {
 		}
 		a.conn = conn
 	}
+
+	// init board
+	time.Sleep(a.BoardReadyDuration)
+	logrus.Info("MSPAdaptor ready.")
 	return nil
 }
 
@@ -61,7 +68,27 @@ func (a *MSPAdaptor) Finalize() error {
 	return a.conn.Close()
 }
 
-func (a *MSPAdaptor) GetPID() (resp PIDConfig, err error) {
+func (a *MSPAdaptor) GetIdentity() (resp IdentityResp, err error) {
+	data, err := a.read(Ident)
+	if err != nil {
+		return
+	}
+
+	err = resp.UnmarshalBinary(data)
+	return
+}
+
+func (a *MSPAdaptor) GetStatus() (resp StatusResp, err error) {
+	data, err := a.read(Status)
+	if err != nil {
+		return
+	}
+
+	err = resp.UnmarshalBinary(data)
+	return
+}
+
+func (a *MSPAdaptor) GetPID() (resp PIDResp, err error) {
 	data, err := a.read(PID)
 	if err != nil {
 		return
@@ -69,6 +96,86 @@ func (a *MSPAdaptor) GetPID() (resp PIDConfig, err error) {
 
 	err = resp.UnmarshalBinary(data)
 	return
+}
+
+func (a *MSPAdaptor) GetAttitude() (resp AttitudeResp, err error) {
+	data, err := a.read(Attitude)
+	if err != nil {
+		return
+	}
+
+	err = resp.UnmarshalBinary(data)
+	return
+}
+
+func (a *MSPAdaptor) GetAltitude() (resp AltitudeResp, err error) {
+	data, err := a.read(Altitude)
+	if err != nil {
+		return
+	}
+
+	err = resp.UnmarshalBinary(data)
+	return
+}
+
+func (a *MSPAdaptor) GetRawIMU() (resp RawIMUResp, err error) {
+	data, err := a.read(RawIMU)
+	if err != nil {
+		return
+	}
+
+	err = resp.UnmarshalBinary(data)
+	return
+}
+
+func (a *MSPAdaptor) GetServo() (resp ServoResp, err error) {
+	data, err := a.read(Servo)
+	if err != nil {
+		return
+	}
+
+	err = resp.UnmarshalBinary(data)
+	return
+}
+
+func (a *MSPAdaptor) GetServoConfig() (resp ServoConfigResp, err error) {
+	data, err := a.read(ServoConfig)
+	if err != nil {
+		return
+	}
+
+	err = resp.UnmarshalBinary(data)
+	return
+}
+
+func (a *MSPAdaptor) GetMotor() (resp MotorResp, err error) {
+	data, err := a.read(Motor)
+	if err != nil {
+		return
+	}
+
+	err = resp.UnmarshalBinary(data)
+	return
+}
+
+func (a *MSPAdaptor) GetMotorPins() (resp MotorPinResp, err error) {
+	data, err := a.read(MotorPins)
+	if err != nil {
+		return
+	}
+
+	err = resp.UnmarshalBinary(data)
+	return
+}
+
+func (a *MSPAdaptor) AccCalibration() error {
+	_, err := a.read(AccCalibration)
+	return err
+}
+
+func (a *MSPAdaptor) MagCalibration() error {
+	_, err := a.read(MagCalibration)
+	return err
 }
 
 func (a *MSPAdaptor) send(dataLength, code uint8, data []byte) (int, error) {
@@ -94,17 +201,9 @@ func (a *MSPAdaptor) read(code uint8) ([]byte, error) {
 		return nil, err
 	}
 
-	// waiting correct header
-	header := make([]byte, 3)
-	for {
-		_, err = a.conn.Read(header)
-		if err != nil {
-			return nil, err
-		}
-
-		if header[0] == HeaderStart && header[1] == HeaderM && header[2] == HeaderArrowResp {
-			break
-		}
+	err = waitHeader(a.conn)
+	if err != nil {
+		return nil, err
 	}
 
 	lengthAndCode := make([]byte, 2)
@@ -121,4 +220,41 @@ func (a *MSPAdaptor) read(code uint8) ([]byte, error) {
 	}
 
 	return data, nil
+}
+
+func waitHeader(conn io.Reader) error {
+	header := make([]byte, 1)
+	for {
+		_, err := conn.Read(header)
+		if err != nil {
+			return err
+		}
+		logrus.Debugf("got %s", header)
+
+		if header[0] != HeaderStart {
+			continue
+		}
+
+		_, err = conn.Read(header)
+		if err != nil {
+			return err
+		}
+		logrus.Debugf("got %s", header)
+
+		if header[0] != HeaderM {
+			continue
+		}
+
+		_, err = conn.Read(header)
+		if err != nil {
+			return err
+		}
+		logrus.Debugf("got %s", header)
+
+		if header[0] != HeaderArrowResp {
+			continue
+		}
+
+		return nil
+	}
 }

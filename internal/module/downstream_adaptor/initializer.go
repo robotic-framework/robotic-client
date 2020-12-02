@@ -5,6 +5,7 @@ import (
 	"github.com/robotic-framework/robotic-client/internal/global"
 	"github.com/sirupsen/logrus"
 	"gobot.io/x/gobot"
+	"time"
 )
 
 var typeInitializer map[enums.DownstreamAdaptorType]initializer
@@ -27,7 +28,18 @@ func NewDownstreamAdaptor(typ enums.DownstreamAdaptorType, config global.RobotCo
 
 type DownstreamAdaptor interface {
 	gobot.Adaptor
-	GetPID() (PIDConfig, error)
+	GetIdentity() (resp IdentityResp, err error)
+	GetStatus() (resp StatusResp, err error)
+	GetPID() (resp PIDResp, err error)
+	GetAttitude() (resp AttitudeResp, err error)
+	GetAltitude() (resp AltitudeResp, err error)
+	GetRawIMU() (resp RawIMUResp, err error)
+	GetServo() (resp ServoResp, err error)
+	GetServoConfig() (resp ServoConfigResp, err error)
+	GetMotor() (resp MotorResp, err error)
+	GetMotorPins() (resp MotorPinResp, err error)
+	AccCalibration() error
+	MagCalibration() error
 }
 
 func firmataAdaptorInitializer(config global.RobotConfiguration) DownstreamAdaptor {
@@ -36,5 +48,5 @@ func firmataAdaptorInitializer(config global.RobotConfiguration) DownstreamAdapt
 }
 
 func mspAdaptorInitializer(config global.RobotConfiguration) DownstreamAdaptor {
-	return NewMSPAdaptor(config.SelfDownstreamAdaptorMSPName)
+	return NewMSPAdaptor(config.SelfDownstreamAdaptorMSPName, time.Duration(config.SelfDownstreamAdaptorMSPReadyDuration))
 }

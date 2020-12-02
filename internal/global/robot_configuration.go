@@ -34,4 +34,6 @@ type RobotConfiguration struct {
 	SelfDownstreamAdaptorFirmataName string `json:"selfDownstreamAdaptorFirmataName"`
 	// MSP串口设备名
 	SelfDownstreamAdaptorMSPName string `json:"selfDownstreamAdaptorMSPName"`
+	// MSP串口准备等待时间
+	SelfDownstreamAdaptorMSPReadyDuration envconfig.Duration `json:"selfDownstreamAdaptorMSPReadyDuration"`
 }

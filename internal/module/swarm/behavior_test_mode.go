@@ -3,16 +3,22 @@ package swarm
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"strings"
+	"time"
 )
 
 func TestWorkingBehavior(r *Swarm) func() {
 	return func() {
-		fmt.Println("get pid...")
-		pid, err := r.downstreamAdaptor.GetPID()
-		if err != nil {
-			logrus.Error(err)
-			return
+
+		for {
+			data, err := r.downstreamAdaptor.GetMotor()
+			if err != nil {
+				logrus.Error(err)
+			}
+			fmt.Printf("\r%+v", data)
+			time.Sleep(100 * time.Millisecond)
+			fmt.Printf("\r%s", strings.Repeat(" ", 100))
 		}
-		fmt.Printf("%+v\n", pid)
+
 	}
 }

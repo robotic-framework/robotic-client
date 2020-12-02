@@ -7,13 +7,12 @@ import (
 	"github.com/eden-framework/plugin-event/event"
 	"github.com/robotic-framework/robotic-client/internal/global"
 	"github.com/robotic-framework/robotic-client/internal/module/swarm"
-	"github.com/sirupsen/logrus"
 )
 
 var globalCtx *context.WaitStopContext
 
 func main() {
-	logrus.SetLevel(logrus.DebugLevel)
+	//logrus.SetLevel(logrus.DebugLevel)
 
 	app := application.NewApplication(runner,
 		application.WithConfig(&global.EventConfig, &global.AgentConfig))

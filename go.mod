@@ -21,6 +21,7 @@ require (
 	github.com/profzone/envconfig v1.5.2
 	github.com/sirupsen/logrus v1.7.0
 	github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07
+	go.bug.st/serial.v1 v0.0.0-20180827123349-5f7892a7bb45
 	gobot.io/x/gobot v1.14.0
 	golang.org/x/crypto v0.0.0-20201117144127-c1f2f97bffc9 // indirect
 )
